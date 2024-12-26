@@ -1,16 +1,16 @@
-import { TProduct } from "@/app/products/page";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { X } from "lucide-react";
-import React, { Dispatch, SetStateAction } from "react";
+import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "./Button";
 import { Input } from "./Input";
+import { TCategory, TProductRequest, TProductResponse } from "@/@types/Product";
 
 interface TModal {
-  product?: TProduct;
-  products: TProduct[];
-  setProducts: Dispatch<SetStateAction<TProduct[]>>,
+  product?: TProductResponse;
+  products: TProductResponse[];
+  setProducts: Dispatch<SetStateAction<TProductResponse[]>>,
   setIsModalOpen: Dispatch<SetStateAction<boolean>>
 }
 
@@ -18,12 +18,33 @@ const schema = z.object({
   nome: z.string().min(1, 'Nome é obrigatório'),
   preco: z.number().min(1, "Preço deve ser no mínimo 1 real"),
   quantidade: z.number().min(1, "Quantidade deve ser no mínimo 1"),
-  descricao: z.string().min(1, 'Descrição é obrigatória'),
-  categoria: z.string().min(1),
+  codigo: z.string().min(1, 'Descrição é obrigatória'),
+  categoria: z.string(),
 });
 
-export function Modal({ product = { nome: '', categoria: '', descrição: '', preco: 0, quantidade: 0 }, products, setProducts, setIsModalOpen }: TModal) {
+export function Modal({ product = {id: undefined, nome: '', categoria: {id: 0, nome: ''}, codigo: '', preco: 0, quantidade: 0 }, products, setProducts, setIsModalOpen }: TModal) {
+  const [categories, setCategories] = useState<TCategory[]>([])
+  console.log(categories);
 
+  const getCategories = async () => {
+    try {
+      const response = await fetch('http://localhost:8080/categorias')
+      
+      if(response.status !== 204) {
+        const data = await response.json()
+        console.log(data);
+        
+        setCategories(data)
+      }
+    } catch(e) {
+      console.log(e);
+      
+    }
+  }
+
+  useEffect(() => {
+    getCategories()
+  }, [])
   type TForm = z.infer<typeof schema>
 
   const {
@@ -36,45 +57,71 @@ export function Modal({ product = { nome: '', categoria: '', descrição: '', pr
   })
 
   register('nome', { value: product.nome })
-  register('descricao', { value: product.descrição })
-  register('categoria', { value: product.categoria })
+  register('codigo', { value: product.codigo })
+  register('categoria', { value: String(product.categoria.id) })
   register('preco', { value: product.preco })
   register('quantidade', { value: product.quantidade })
 
   const exit = () => setIsModalOpen(false)
 
-  function handleForm(data: TForm) {
+  async function handleForm(data: TForm) {
+
+    console.log(data.categoria);
 
     if (product.id) {
-      const updateProduct: TProduct = {
-        id: product.id,
+      const updateProduct: TProductRequest = {
         nome: data.nome,
-        categoria: data.categoria,
-        descrição: data.descricao,
+        idCategoria: Number(data.categoria),
+        codigo: data.codigo,
         preco: data.preco,
         quantidade: data.quantidade,
       }
-      const eventsUpdated = products.map(prev => {
-        if (prev === product) {
-          return updateProduct
-        }
-        else return prev
+
+      const response = await fetch(`http://localhost:8080/produtos/${product.id}`, {
+        method: 'PUT',
+        body: JSON.stringify(updateProduct),
+        headers: new Headers({'Content-Type': 'application/json'})
       })
 
-      setProducts(eventsUpdated)
+      if(response.status === 200) {
+
+        const data: TProductResponse = await response.json()
+
+        const eventsUpdated = products.map(prev => {
+          if (prev.id === data.id) {
+            return data
+          }
+          else return prev
+        })
+  
+  
+        setProducts(eventsUpdated)
+      }
+
+
 
     } else {
 
-      const newProduct: TProduct = {
-        id: Math.random(),
+      const newProduct: TProductRequest = {
         nome: data.nome,
-        categoria: data.categoria,
-        descrição: data.descricao,
+        codigo: data.codigo,
         preco: data.preco,
         quantidade: data.quantidade,
+        idCategoria: Number(data.categoria),
       }
 
-      setProducts(prev => [...prev, newProduct])
+      const response = await fetch('http://localhost:8080/produtos', {
+        method: 'POST',
+        body: JSON.stringify(newProduct),
+        headers: new Headers({'Content-Type': 'application/json'})
+      })
+
+      if(response.status === 200) {
+        const data: TProductResponse = await response.json()
+        setProducts(prev => [...prev, data])
+
+      }
+
     }
     exit()
 
@@ -86,12 +133,12 @@ export function Modal({ product = { nome: '', categoria: '', descrição: '', pr
   }
 
   return (
-    <div className="absolute h-full w-full bg-black bg-opacity-50 flex justify-center items-center">
-      <div className="bg-white flex flex-col gap-8 p-5 w-1/2 rounded-lg max-h-[90%] overflow-y-auto">
+    <div onClick={e => setIsModalOpen(false)} className="absolute h-full w-full bg-black bg-opacity-50 flex justify-center items-center">
+      <div onClick={e => e.stopPropagation()} className="bg-white flex flex-col gap-8 p-5 w-1/2 rounded-lg max-h-[90%] overflow-y-auto">
         <header className="flex justify-between items-center">
           <p className="font-bold text-2xl">Adicionar Produtos</p>
 
-          <X size={24} onClick={exit} />
+          <X className="cursor-pointer" size={24} onClick={exit} />
         </header>
 
         <form onSubmit={handleSubmit(handleForm)} className="flex flex-col gap-8">
@@ -104,7 +151,9 @@ export function Modal({ product = { nome: '', categoria: '', descrição: '', pr
           <div>
             <label htmlFor="categoria"><span className="text-red-500">*</span> Categoria</label>
             <select {...register('categoria')} id="categoria" className="w-full px-4 py-2 outline-none border-2 border-gray-300 rounded-lg focus:border-blue-400">
-              <option value="Notebooks">Notebooks</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>{category.nome}</option>
+              ))}
             </select>
             {errors.categoria?.message && <ErrorMessage message={errors.categoria.message} />}
           </div>
@@ -117,9 +166,9 @@ export function Modal({ product = { nome: '', categoria: '', descrição: '', pr
           </div>
 
           <div>
-            <label htmlFor="descricao"><span className="text-red-500">*</span> Descrição</label>
-            <Input id="descricao" placeholder="Notebook Air M1" error={errors.descricao?.message ? true : false} {...register('descricao')} />
-            {errors.descricao?.message && <ErrorMessage message={errors.descricao.message} />}
+            <label htmlFor="codigo"><span className="text-red-500">*</span> Código</label>
+            <Input id="codigo" placeholder="xxx-xxx-xxx" error={errors.codigo?.message ? true : false} {...register('codigo')} />
+            {errors.codigo?.message && <ErrorMessage message={errors.codigo.message} />}
           </div>
           <div>
             <label htmlFor="quantidade"><span className="text-red-500">*</span> Quantidade</label>
