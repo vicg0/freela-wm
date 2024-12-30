@@ -24,7 +24,6 @@ const schema = z.object({
 
 export function Modal({ product = {id: undefined, nome: '', categoria: {id: 0, nome: ''}, codigo: '', preco: 0, quantidade: 0 }, products, setProducts, setIsModalOpen }: TModal) {
   const [categories, setCategories] = useState<TCategory[]>([])
-  console.log(categories);
 
   const getCategories = async () => {
     try {
@@ -32,7 +31,6 @@ export function Modal({ product = {id: undefined, nome: '', categoria: {id: 0, n
       
       if(response.status !== 204) {
         const data = await response.json()
-        console.log(data);
         
         setCategories(data)
       }
@@ -65,8 +63,6 @@ export function Modal({ product = {id: undefined, nome: '', categoria: {id: 0, n
   const exit = () => setIsModalOpen(false)
 
   async function handleForm(data: TForm) {
-
-    console.log(data.categoria);
 
     if (product.id) {
       const updateProduct: TProductRequest = {

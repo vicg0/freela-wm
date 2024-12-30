@@ -7,6 +7,9 @@ import { PencilLine, Plus, Trash } from "lucide-react";
 import { useEffect, useState } from "react";
 import { GET } from "./api/route";
 import { TProductResponse } from "@/@types/Product";
+import { ColumnHeader } from "@/components/ColumnHeader";
+import { Column } from "@/components/Column";
+import { Action } from "@/components/Action";
 
 export default function Home() {
   const [products, setProducts] = useState<TProductResponse[]>([])
@@ -31,14 +34,6 @@ export default function Home() {
 
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
 
-  const Column = ({ text }: { text: string }) => {
-    return <td className="py-4 px-2">{text}</td>
-  }
-
-  const ColumnHeader = ({ text }: { text: string }) => {
-    return <td className="text-left font-bold py-4 px-2">{text}</td>
-  }
-
   const deleteProduct = async (product: TProductResponse) => {
     const response = await fetch(`http://localhost:8080/produtos/${product.id}`, {
       method: 'DELETE',
@@ -49,12 +44,6 @@ export default function Home() {
         products.filter(ev => ev.id !== product.id)
       )
     }
-  }
-
-  function Action({ icon, onClick, edit = false }: { icon: React.ReactNode, onClick: () => void, edit?: boolean }) {
-    return (
-      <div data-edit={edit} className="rounded-full p-3 data-[edit=true]:bg-yellow-500 text-white bg-red-500" onClick={onClick}>{icon}</div>
-    )
   }
 
   // const Delete = ({ delete, icon }: { icon: React.ReactNode, delete: boolean }) => {
@@ -81,8 +70,8 @@ export default function Home() {
                 <ColumnHeader text={'Código'} />
                 <ColumnHeader text={'Nome'} />
                 <ColumnHeader text={'Quantidade'} />
-                <ColumnHeader text={'Preço'} />
                 <ColumnHeader text={'Categoria'} />
+                <ColumnHeader text={'Preço'} />
                 <td className="flex h-full items-center justify-center py-3">
                   <Button onClick={() => {
                     setEditProduct(undefined)
@@ -97,8 +86,8 @@ export default function Home() {
                   <Column text={product.codigo} />
                   <Column text={product.nome} />
                   <Column text={String(product.quantidade)} />
-                  <Column text={String(product.preco.toFixed(2))} />
                   <Column text={product.categoria.nome} />
+                  <Column text={`R$${String(product.preco.toFixed(2))}`} />
                   <td className="h-full flex items-center justify-center gap-3 p-3" >
                     <Action edit icon={<PencilLine size={18} />} onClick={() => {
                       setEditProduct(product)
