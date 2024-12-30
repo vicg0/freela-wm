@@ -5,6 +5,7 @@ import { Action } from "@/components/Action"
 import { Button } from "@/components/Button"
 import { Column } from "@/components/Column"
 import { ColumnHeader } from "@/components/ColumnHeader"
+import { Input } from "@/components/Input"
 import { ModalCarrinho } from "@/components/ModalCarrinho"
 import { Plus, Trash } from "lucide-react"
 import { ChangeEvent, useEffect, useState } from "react"
@@ -12,6 +13,7 @@ import { ChangeEvent, useEffect, useState } from "react"
 export default function Sales() {
   const [carrinho, setCarrinho] = useState<TProductResponse[]>([])
   const [total, setTotal] = useState(0)
+  const [cpf, setCpf] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   const deleteProduct = async (product: TProductResponse) => {
@@ -38,7 +40,7 @@ export default function Sales() {
   const vender = async () => {
 
     const venda = {
-      cpf: '43511626862',
+      cpf: cpf,
       produtos: []
     }
     
@@ -84,6 +86,9 @@ export default function Sales() {
         <ModalCarrinho setCarrinho={setCarrinho} carrinho={carrinho} setIsModalOpen={setIsModalOpen} />
       )}
       <div className="p-12 flex flex-col gap-3">
+        <div>
+          <Input value={cpf} placeholder="CPF" onChange={e => setCpf(e.target.value)} />
+        </div>
         <div className="p-6 flex-col shadow-xl">
           <h1 className="font-bold text-2xl">Carrinho</h1>
 

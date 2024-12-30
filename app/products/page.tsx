@@ -58,9 +58,9 @@ export default function Home() {
         <Modal product={editProduct} products={products} setProducts={setProducts} setIsModalOpen={setIsModalOpen} />
       )}
       <div className="p-12">
-        <div>
+        {/* <div>
           <Input placeholder="Buscar produtos" />
-        </div>
+        </div> */}
         <div className="p-6 flex-col shadow-xl">
           <h1 className="font-bold text-2xl">Produtos em estoque</h1>
 
