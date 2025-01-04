@@ -20,3 +20,8 @@ export type TCategory = {
   id: number,
   nome: string
 }
+
+export type TOption = {
+  label: string,
+  value: string
+}

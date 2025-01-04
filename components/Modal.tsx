@@ -1,11 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { X } from "lucide-react";
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "./Button";
 import { Input } from "./Input";
 import { TCategory, TProductRequest, TProductResponse } from "@/@types/Product";
+import { NumericFormat } from "react-number-format";
 
 interface TModal {
   product?: TProductResponse;
@@ -16,27 +17,35 @@ interface TModal {
 
 const schema = z.object({
   nome: z.string().min(1, 'Nome é obrigatório'),
-  preco: z.number().min(1, "Preço deve ser no mínimo 1 real"),
-  quantidade: z.number().min(1, "Quantidade deve ser no mínimo 1"),
+  preco: z.string().min(1, "Preço deve ser no mínimo 1 real")
+  .transform(val => val.replace('R$ ', '').replace('.', '').replace(',', '.'))
+  .refine(val => Number(val) > 0, {
+    message: 'Preço deve ser no mínimo R$1'
+  }),
+  quantidade: z.string().min(1, "Quantidade deve ser no mínimo 1")
+    .transform(val => val.replace(',', '.'))
+    .refine(val => Number(val) > 0, {
+      message: 'Quantidade deve ser no mínimo 1'
+    }),
   codigo: z.string().min(1, 'Descrição é obrigatória'),
   categoria: z.string(),
 });
 
-export function Modal({ product = {id: undefined, nome: '', categoria: {id: 0, nome: ''}, codigo: '', preco: 0, quantidade: 0 }, products, setProducts, setIsModalOpen }: TModal) {
+export function Modal({ product = { id: undefined, nome: '', categoria: { id: 0, nome: '' }, codigo: '', preco: 0, quantidade: 0 }, products, setProducts, setIsModalOpen }: TModal) {
   const [categories, setCategories] = useState<TCategory[]>([])
 
   const getCategories = async () => {
     try {
       const response = await fetch('http://localhost:8080/categorias')
-      
-      if(response.status !== 204) {
+
+      if (response.status !== 204) {
         const data = await response.json()
-        
+
         setCategories(data)
       }
-    } catch(e) {
+    } catch (e) {
       console.log(e);
-      
+
     }
   }
 
@@ -48,38 +57,47 @@ export function Modal({ product = {id: undefined, nome: '', categoria: {id: 0, n
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors }
   } = useForm<TForm>({
-    mode: 'onSubmit',
+    defaultValues: {
+      nome: product.nome,
+      categoria: String(product.categoria.id),
+      codigo: product.codigo,
+      preco: String(product.preco).replace('.', ','),
+      quantidade: String(product.quantidade)
+    },
+    mode: 'onChange',
     resolver: zodResolver(schema)
   })
 
-  register('nome', { value: product.nome })
-  register('codigo', { value: product.codigo })
-  register('categoria', { value: String(product.categoria.id) })
-  register('preco', { value: product.preco })
-  register('quantidade', { value: product.quantidade })
+  // register('nome', { value: product.nome })
+  // register('codigo', { value: product.codigo })
+  // register('categoria', { value: String(product.categoria.id) })
+  // register('preco', { value: String(product.preco) })
+  // register('quantidade', { value: String(product.quantidade) })
 
   const exit = () => setIsModalOpen(false)
 
   async function handleForm(data: TForm) {
-
+    console.log(Number(data.quantidade));
+    return
     if (product.id) {
       const updateProduct: TProductRequest = {
         nome: data.nome,
         idCategoria: Number(data.categoria),
         codigo: data.codigo,
-        preco: data.preco,
-        quantidade: data.quantidade,
+        preco: Number(data.preco),
+        quantidade: Number(data.quantidade),
       }
 
       const response = await fetch(`http://localhost:8080/produtos/${product.id}`, {
         method: 'PUT',
         body: JSON.stringify(updateProduct),
-        headers: new Headers({'Content-Type': 'application/json'})
+        headers: new Headers({ 'Content-Type': 'application/json' })
       })
 
-      if(response.status === 200) {
+      if (response.status === 200) {
 
         const data: TProductResponse = await response.json()
 
@@ -89,30 +107,27 @@ export function Modal({ product = {id: undefined, nome: '', categoria: {id: 0, n
           }
           else return prev
         })
-  
-  
+
         setProducts(eventsUpdated)
       }
-
-
 
     } else {
 
       const newProduct: TProductRequest = {
         nome: data.nome,
         codigo: data.codigo,
-        preco: data.preco,
-        quantidade: data.quantidade,
+        preco: Number(data.preco),
+        quantidade: Number(data.quantidade),
         idCategoria: Number(data.categoria),
       }
 
       const response = await fetch('http://localhost:8080/produtos', {
         method: 'POST',
         body: JSON.stringify(newProduct),
-        headers: new Headers({'Content-Type': 'application/json'})
+        headers: new Headers({ 'Content-Type': 'application/json' })
       })
 
-      if(response.status === 200) {
+      if (response.status === 200) {
         const data: TProductResponse = await response.json()
         setProducts(prev => [...prev, data])
 
@@ -140,7 +155,7 @@ export function Modal({ product = {id: undefined, nome: '', categoria: {id: 0, n
         <form onSubmit={handleSubmit(handleForm)} className="flex flex-col gap-8">
           <div>
             <label htmlFor="nome"><span className="text-red-500">*</span> Nome</label>
-            <Input id='nome' placeholder="Victor Boliviano" {...register('nome', { required: true })} error={errors.nome?.message ? true : false} />
+            <Input id='nome' placeholder="Carlos" {...register('nome', { required: true })} error={errors.nome?.message ? true : false} />
             {errors.nome?.message && <ErrorMessage message={errors.nome.message} />}
           </div>
 
@@ -154,10 +169,28 @@ export function Modal({ product = {id: undefined, nome: '', categoria: {id: 0, n
             {errors.categoria?.message && <ErrorMessage message={errors.categoria.message} />}
           </div>
 
-          <div>
+          <div className="flex flex-col">
             <label htmlFor="preco"><span className="text-red-500">*</span> Preço</label>
 
-            <Input id="preco" type="number" placeholder="10.0" {...register('preco', { valueAsNumber: true, required: true })} error={errors.preco?.message ? true : false} />
+            <Controller
+              name="preco"
+              control={control}
+
+              render={({ field: { ref, ...rest } }) => (
+                <NumericFormat
+                  thousandSeparator="."
+                  decimalSeparator=","
+                  prefix="R$ "
+                  decimalScale={2}
+                  getInputRef={ref}
+                  data-error={errors.preco?.message ? true : false}
+                  className="py-2 flex items-center gap-3 border-2 transition-all hover:border-blue-500 border-gray-300 focus-within:border-blue-500 rounded-md px-3 data-[error=true]:border-red-500"
+                  {...rest}
+                />
+              )}
+            />
+
+            {/* <Input id="preco" placeholder="10.0" {...register('preco', { required: true })} error={errors.preco?.message ? true : false} /> */}
             {errors.preco?.message && <ErrorMessage message={errors.preco.message} />}
           </div>
 
@@ -168,7 +201,20 @@ export function Modal({ product = {id: undefined, nome: '', categoria: {id: 0, n
           </div>
           <div>
             <label htmlFor="quantidade"><span className="text-red-500">*</span> Quantidade</label>
-            <Input id="quantidade" type="number" placeholder="0" error={errors.quantidade?.message ? true : false} {...register('quantidade', { valueAsNumber: true, required: true })} />
+            <Controller
+              name="quantidade"
+              control={control}
+
+              render={({ field: { ref, ...rest } }) => (
+                <NumericFormat
+                  getInputRef={ref}
+                  decimalSeparator=","
+                  data-error={errors.quantidade?.message ? true : false}
+                  className="w-full py-2 flex items-center gap-3 border-2 transition-all hover:border-blue-500 border-gray-300 focus-within:border-blue-500 rounded-md px-3 data-[error=true]:border-red-500"
+                  {...rest}
+                />
+              )}
+            />
             {errors.quantidade?.message && <ErrorMessage message={errors.quantidade.message} />}
           </div>
 
