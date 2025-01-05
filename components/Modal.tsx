@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { X } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -18,10 +18,10 @@ interface TModal {
 const schema = z.object({
   nome: z.string().min(1, 'Nome é obrigatório'),
   preco: z.string().min(1, "Preço deve ser no mínimo 1 real")
-  .transform(val => val.replace('R$ ', '').replace('.', '').replace(',', '.'))
-  .refine(val => Number(val) > 0, {
-    message: 'Preço deve ser no mínimo R$1'
-  }),
+    .transform(val => val.replace('R$ ', '').replace('.', '').replace(',', '.'))
+    .refine(val => Number(val) > 0, {
+      message: 'Preço deve ser no mínimo R$1'
+    }),
   quantidade: z.string().min(1, "Quantidade deve ser no mínimo 1")
     .transform(val => val.replace(',', '.'))
     .refine(val => Number(val) > 0, {
@@ -42,6 +42,7 @@ export function Modal({ product = { id: undefined, nome: '', categoria: { id: 0,
         const data = await response.json()
 
         setCategories(data)
+        if(product.categoria.id === 0) setValue('categoria', String(data[0].id))
       }
     } catch (e) {
       console.log(e);
@@ -51,6 +52,7 @@ export function Modal({ product = { id: undefined, nome: '', categoria: { id: 0,
 
   useEffect(() => {
     getCategories()
+
   }, [])
   type TForm = z.infer<typeof schema>
 
@@ -58,6 +60,7 @@ export function Modal({ product = { id: undefined, nome: '', categoria: { id: 0,
     register,
     handleSubmit,
     control,
+    setValue,
     formState: { errors }
   } = useForm<TForm>({
     defaultValues: {
@@ -71,17 +74,9 @@ export function Modal({ product = { id: undefined, nome: '', categoria: { id: 0,
     resolver: zodResolver(schema)
   })
 
-  // register('nome', { value: product.nome })
-  // register('codigo', { value: product.codigo })
-  // register('categoria', { value: String(product.categoria.id) })
-  // register('preco', { value: String(product.preco) })
-  // register('quantidade', { value: String(product.quantidade) })
-
   const exit = () => setIsModalOpen(false)
 
   async function handleForm(data: TForm) {
-    console.log(Number(data.quantidade));
-    return
     if (product.id) {
       const updateProduct: TProductRequest = {
         nome: data.nome,

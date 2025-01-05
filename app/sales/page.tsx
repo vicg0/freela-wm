@@ -51,8 +51,6 @@ export default function Sales() {
       })
     })
 
-    console.log(venda);
-
     try {
       const response = await fetch('http://localhost:8080/vendas', {
         method: 'POST',

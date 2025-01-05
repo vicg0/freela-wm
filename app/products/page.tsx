@@ -11,6 +11,7 @@ import { ColumnHeader } from "@/components/ColumnHeader";
 import { Column } from "@/components/Column";
 import { Action } from "@/components/Action";
 import { SelectFilter } from "@/components/SelectFilter";
+import { ModalCategoria } from "@/components/ModalCategoria";
 
 export default function Home() {
   const [products, setProducts] = useState<TProductResponse[]>([])
@@ -37,6 +38,7 @@ export default function Home() {
   const [editProduct, setEditProduct] = useState<TProductResponse>()
 
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
+  const [isModalCategoriaOpen, setIsModalCategoriaOpen] = useState<boolean>(false)
 
   const deleteProduct = async (product: TProductResponse) => {
     const response = await fetch(`http://localhost:8080/produtos/${product.id}`, {
@@ -65,11 +67,15 @@ export default function Home() {
       {isModalOpen && (
         <Modal product={editProduct} products={products} setProducts={setProducts} setIsModalOpen={setIsModalOpen} />
       )}
+
+      {(filter === 'adicionar') && (
+        <ModalCategoria setFilter={setFilter} setIsModalCategoriaOpen={setIsModalCategoriaOpen} />
+      )}
       <div className="p-12">
         <div className="
         flex justify-between items-center">
           <Input placeholder="Buscar produtos" onChange={e => setSearch(e.target.value)} />
-          <SelectFilter filter={filter} setFilter={setFilter} />
+          <SelectFilter filter={filter} setFilter={setFilter} isModalCategoriaOpen={isModalCategoriaOpen} setIsModalCategoriaOpen={setIsModalCategoriaOpen} />
         </div>
         <div className="p-6 flex-col shadow-xl">
           <h1 className="font-bold text-2xl">Produtos em estoque</h1>
