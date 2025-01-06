@@ -1,6 +1,6 @@
 import { TCategory, TOption } from "@/@types/Product";
 import { Select } from "@radix-ui/themes";
-import { Dispatch, SetStateAction, useCallback, useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Button } from "./Button";
 import { Plus, Undo2 } from "lucide-react";
 
@@ -12,11 +12,9 @@ type TOptionGroup = {
 interface SelectProps {
   filter: string;
   setFilter: Dispatch<SetStateAction<string>>;
-  isModalCategoriaOpen: boolean;
-  setIsModalCategoriaOpen: Dispatch<SetStateAction<boolean>>,
 }
 
-export function SelectFilter({ filter, setFilter, isModalCategoriaOpen, setIsModalCategoriaOpen }: SelectProps) {
+export function SelectFilter({ filter, setFilter }: SelectProps) {
   const [categories, setCategories] = useState<TOptionGroup[]>([])
 
   const getCategories = async () => {
@@ -55,7 +53,7 @@ export function SelectFilter({ filter, setFilter, isModalCategoriaOpen, setIsMod
 
   useEffect(() => {
     getCategories()
-  }, [isModalCategoriaOpen])
+  }, [filter])
 
   return (
     <div className="flex gap-2 items-center">
@@ -75,7 +73,7 @@ export function SelectFilter({ filter, setFilter, isModalCategoriaOpen, setIsMod
 
           <Select.Item className="bg-blue-400 rounded-md" value="adicionar">
 
-          <div className="z-0 flex items-center gap-1  p-1 text-sm justify-center cursor-pointer text-white" onClick={e => setIsModalCategoriaOpen(true)}>
+          <div className="z-0 flex items-center gap-1  p-1 text-sm justify-center cursor-pointer text-white">
             <Plus size={16} />
             <p>Adicione uma categoria</p>
           </div>

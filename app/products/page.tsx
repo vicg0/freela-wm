@@ -38,7 +38,6 @@ export default function Home() {
   const [editProduct, setEditProduct] = useState<TProductResponse>()
 
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
-  const [isModalCategoriaOpen, setIsModalCategoriaOpen] = useState<boolean>(false)
 
   const deleteProduct = async (product: TProductResponse) => {
     const response = await fetch(`http://localhost:8080/produtos/${product.id}`, {
@@ -69,13 +68,13 @@ export default function Home() {
       )}
 
       {(filter === 'adicionar') && (
-        <ModalCategoria setFilter={setFilter} setIsModalCategoriaOpen={setIsModalCategoriaOpen} />
+        <ModalCategoria setFilter={setFilter} />
       )}
       <div className="p-12">
         <div className="
         flex justify-between items-center">
           <Input placeholder="Buscar produtos" onChange={e => setSearch(e.target.value)} />
-          <SelectFilter filter={filter} setFilter={setFilter} isModalCategoriaOpen={isModalCategoriaOpen} setIsModalCategoriaOpen={setIsModalCategoriaOpen} />
+          <SelectFilter filter={filter} setFilter={setFilter} />
         </div>
         <div className="p-6 flex-col shadow-xl">
           <h1 className="font-bold text-2xl">Produtos em estoque</h1>

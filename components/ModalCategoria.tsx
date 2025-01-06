@@ -8,7 +8,6 @@ import { Input } from "./Input";
 import { Button } from "./Button";
 
 interface TModalCarrinho {
-  setIsModalCategoriaOpen: Dispatch<SetStateAction<boolean>>,
   setFilter: Dispatch<SetStateAction<string>>;
 }
 
@@ -17,7 +16,7 @@ export function ModalCategoria({ setFilter }: TModalCarrinho) {
   const [categorias, setCategorias] = useState<TCategory[]>([])
   const [nomeCategoria, setNomeCategoria] = useState('')
 
-  const exit = () => setFilter('categoria')
+  const exit = () => setFilter('')
 
   const getCategories = async () => {
 

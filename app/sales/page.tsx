@@ -40,7 +40,7 @@ export default function Sales() {
   const vender = async () => {
 
     const venda = {
-      cpf: cpf,
+      cpf: cpf ? cpf : null,
       produtos: []
     }
     
@@ -74,7 +74,7 @@ export default function Sales() {
   useEffect(() => {
     setTotal(0)
     carrinho.map(produto => {
-      setTotal(prev => prev + produto.preco)
+      setTotal(prev => prev + (produto.preco * produto.quantidadeVenda))
     })
   }, [carrinho])
 

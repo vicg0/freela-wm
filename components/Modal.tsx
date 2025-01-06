@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Plus, X } from "lucide-react";
+import { X } from "lucide-react";
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -159,7 +159,7 @@ export function Modal({ product = { id: undefined, nome: '', categoria: { id: 0,
             <label htmlFor="categoria"><span className="text-red-500">*</span> Categoria</label>
             <select value={categoria} onChange={e => {
               setValue('categoria', e.target.value)
-              setCategoria(e.target.value)
+              setCategoria(Number(e.target.value))
             }} id="categoria" className="w-full px-4 py-2 outline-none border-2 border-gray-300 rounded-lg focus:border-blue-400">
               {categories.map((category) => (
                 <option key={category.id} value={category.id}>{category.nome}</option>
