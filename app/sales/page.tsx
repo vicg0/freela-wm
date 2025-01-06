@@ -40,7 +40,7 @@ export default function Sales() {
   const vender = async () => {
 
     const venda = {
-      cpf: cpf ? cpf : null,
+      cpf: cpf,
       produtos: []
     }
     
