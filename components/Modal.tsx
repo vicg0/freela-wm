@@ -34,7 +34,6 @@ const schema = z.object({
 export function Modal({ product = { id: undefined, nome: '', categoria: { id: 0, nome: '' }, codigo: '', preco: 0, quantidade: 0 }, products, setProducts, setIsModalOpen }: TModal) {
   const [categories, setCategories] = useState<TCategory[]>([])
   const [categoria, setCategoria] = useState(product.categoria.id)
-  console.log(categoria);
 
   const getCategories = async () => {
     try {
