@@ -33,6 +33,8 @@ const schema = z.object({
 
 export function Modal({ product = { id: undefined, nome: '', categoria: { id: 0, nome: '' }, codigo: '', preco: 0, quantidade: 0 }, products, setProducts, setIsModalOpen }: TModal) {
   const [categories, setCategories] = useState<TCategory[]>([])
+  const [categoria, setCategoria] = useState(product.categoria.id)
+  console.log(categoria);
 
   const getCategories = async () => {
     try {
@@ -156,7 +158,10 @@ export function Modal({ product = { id: undefined, nome: '', categoria: { id: 0,
 
           <div>
             <label htmlFor="categoria"><span className="text-red-500">*</span> Categoria</label>
-            <select {...register('categoria')} id="categoria" className="w-full px-4 py-2 outline-none border-2 border-gray-300 rounded-lg focus:border-blue-400">
+            <select value={categoria} onChange={e => {
+              setValue('categoria', e.target.value)
+              setCategoria(e.target.value)
+            }} id="categoria" className="w-full px-4 py-2 outline-none border-2 border-gray-300 rounded-lg focus:border-blue-400">
               {categories.map((category) => (
                 <option key={category.id} value={category.id}>{category.nome}</option>
               ))}
