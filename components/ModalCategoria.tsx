@@ -23,7 +23,7 @@ export function ModalCategoria({ setFilter }: TModalCarrinho) {
     try {
       const response = await fetch('http://localhost:8080/categorias')
 
-      if (response.status !== 204) {
+      if (response.status === 200) {
         const data: TCategory[] = await response.json()
 
         setCategorias(data)

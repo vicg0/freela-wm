@@ -23,7 +23,7 @@ export default function Home() {
     try {
       const response = await GET()
 
-      if (response.length !== 204) {
+      if (response.length === 200) {
         setProducts(response)
       }
     } catch (e) {

@@ -22,7 +22,7 @@ export function SelectFilter({ filter, setFilter }: SelectProps) {
     try {
       const response = await fetch('http://localhost:8080/categorias')
 
-      if (response.status !== 204) {
+      if (response.status === 200) {
         const data = await response.json()
 
         const options: TOption[] = []
@@ -84,7 +84,7 @@ export function SelectFilter({ filter, setFilter }: SelectProps) {
 
       {filter !== '' && (
 
-        <Button onClick={e => setFilter('')} icon={<Undo2 size={20} />} className="bg-yellow-400 rounded-md px-3 py-2" />
+        <Button onClick={(e) => setFilter('')} icon={<Undo2 size={20} />} className="bg-yellow-400 rounded-md px-3 py-2" />
       )}
 
     </div>

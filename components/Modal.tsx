@@ -39,7 +39,7 @@ export function Modal({ product = { id: undefined, nome: '', categoria: { id: 0,
     try {
       const response = await fetch('http://localhost:8080/categorias')
 
-      if (response.status !== 204) {
+      if (response.status === 200) {
         const data = await response.json()
 
         setCategories(data)
