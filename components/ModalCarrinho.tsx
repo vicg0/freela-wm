@@ -33,10 +33,11 @@ export function ModalCarrinho({ carrinho, setCarrinho, setIsModalOpen }: TModalC
 
   const getProdutos = async () => {
     try {
-      const response = await GET()
+      const response = await fetch('http://localhost:8080/produtos')
 
-      if (response.length === 200) {
-        setProducts(response)
+      if (response.status === 200) {
+        const data = await response.json()
+        setProducts(data)
       }
     } catch (e) {
       console.log(e);
