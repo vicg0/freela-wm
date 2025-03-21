@@ -4,7 +4,7 @@ export type TProductRequest = {
   preco: number;
   quantidade: number;
   codigo: string;
-  idCategoria: number;
+  idCategoria: number
 }
 
 export type TProductResponse = {

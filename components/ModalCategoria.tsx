@@ -6,15 +6,33 @@ import { Column } from "./Column";
 import { Action } from "./Action";
 import { Input } from "./Input";
 import { Button } from "./Button";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ErrorMessage } from "./ErrorMessage";
 
 interface TModalCarrinho {
   setFilter: Dispatch<SetStateAction<string>>;
 }
 
+const schema = z.object({
+  categoria: z.string().min(1, "Insira um nome a categoria")
+})
+
 export function ModalCategoria({ setFilter }: TModalCarrinho) {
 
   const [categorias, setCategorias] = useState<TCategory[]>([])
-  const [nomeCategoria, setNomeCategoria] = useState('')
+
+  type TForm = z.infer<typeof schema>
+
+  const { 
+    register,
+    handleSubmit,
+    formState: { errors }
+   } = useForm<TForm>({
+    mode: 'onSubmit',
+    resolver: zodResolver(schema)
+  })
 
   const exit = () => setFilter('')
 
@@ -56,12 +74,12 @@ export function ModalCategoria({ setFilter }: TModalCarrinho) {
     getCategories()
   }, [])
 
-  const criarCategoria = async () => {
+  const criarCategoria = async ({ categoria }: TForm) => {
     try {
       const response = await fetch('http://localhost:8080/categorias', {
         method: 'POST',
         body: JSON.stringify({
-          nome: nomeCategoria
+          nome: categoria
         }),
         headers: new Headers({ 'Content-Type': 'application/json' })
       })
@@ -86,10 +104,14 @@ export function ModalCategoria({ setFilter }: TModalCarrinho) {
           <X className="cursor-pointer" size={24} onClick={exit} />
         </header>
 
-        <div className="flex items-center justify-between">
-          <Input placeholder="Nome da categoria" onChange={e => setNomeCategoria(e.target.value)} />
-          <Button onClick={criarCategoria} text="Adicionar" className="h-full bg-green-500 px-4 py-2 rounded-md text-white flex gap-3" icon={<Plus size={24} />} />
-        </div>
+        <form onSubmit={handleSubmit(criarCategoria)} className="flex items-center justify-between">
+          <div className="flex flex-col">
+          <Input {...register('categoria')} placeholder="Nome da categoria" error={errors.categoria?.message ? true : false} />
+          {errors.categoria?.message && <ErrorMessage message={errors.categoria.message} />}
+
+          </div>
+          <Button type="submit" text="Adicionar" className="h-full bg-green-500 px-4 py-2 rounded-md text-white flex gap-3" icon={<Plus size={24} />} />
+        </form>
 
         <table className="w-full mt-6">
           <thead>

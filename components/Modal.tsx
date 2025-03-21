@@ -7,6 +7,7 @@ import { Button } from "./Button";
 import { Input } from "./Input";
 import { TCategory, TProductRequest, TProductResponse } from "@/@types/Product";
 import { NumericFormat } from "react-number-format";
+import { ErrorMessage } from "./ErrorMessage";
 
 interface TModal {
   product?: TProductResponse;
@@ -114,33 +115,28 @@ export function Modal({ product = { id: undefined, nome: '', categoria: { id: 0,
         codigo: data.codigo,
         preco: Number(data.preco),
         quantidade: Number(data.quantidade),
-        idCategoria: Number(data.categoria),
+        idCategoria: Number(data.categoria)
       }
 
-      const response = await fetch('http://localhost:8080/produtos', {
-        method: 'POST',
-        body: JSON.stringify(newProduct),
-        headers: new Headers({ 'Content-Type': 'application/json' })
-      })
-
-      if (response.status === 200) {
-        const data: TProductResponse = await response.json()
-        setProducts(prev => [...prev, data])
-
-      }
+        const response = await fetch('http://localhost:8080/produtos', {
+          method: 'POST',
+          body: JSON.stringify(newProduct),
+          headers: new Headers({ 'Content-Type': 'application/json' })
+        })
+        
+        if (response.status === 200) {
+          const dataProduto: TProductResponse = await response.json()
+          setProducts(prev => [...prev, dataProduto])
+          
+        }
 
     }
     exit()
 
   }
-  const ErrorMessage = ({ message }: { message: string }) => {
-    return (
-      <span className="text-red-500">{message}</span>
-    )
-  }
 
   return (
-    <div onClick={e => setIsModalOpen(false)} className="absolute h-full w-full bg-black bg-opacity-50 flex justify-center items-center">
+    <div onClick={e => setIsModalOpen(false)} className="fixed h-full w-full bg-black bg-opacity-50 flex justify-center items-center">
       <div onClick={e => e.stopPropagation()} className="bg-white flex flex-col gap-8 p-5 w-1/2 rounded-lg max-h-[90%] overflow-y-auto">
         <header className="flex justify-between items-center">
           <p className="font-bold text-2xl">Adicionar Produtos</p>

@@ -23,6 +23,7 @@ export default function Home() {
     try {
       const response = await fetch('http://localhost:8080/produtos')
 
+
       if (response.status === 200) {
         const data = await response.json()
         setProducts(data)
@@ -55,12 +56,13 @@ export default function Home() {
   useEffect(() => {
     setFiltredProducts(products.filter((product) => {
       return (
-        (product.nome.toLowerCase().includes(search.toLowerCase()) ||
-          product.codigo.toLowerCase().includes(search.toLowerCase())) &&
-        product.categoria.nome.toLowerCase().includes(filter.toLowerCase())
-      )
-    }))
+        product.nome.toLowerCase().includes(search.toLowerCase()) ||
+        product.codigo.toLowerCase().includes(search.toLowerCase())
+      ) && (!filter || (product.categoria && product.categoria.id === Number(filter)));
+    }));
   }, [filter, search, products])
+
+  console.log(filter);
 
   return (
     <>
