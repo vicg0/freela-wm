@@ -65,8 +65,8 @@ export function SelectFilter({ filter, setFilter }: SelectProps) {
           {categories.map((option, index) => (
             <Select.Group key={index}>
               <Select.Label>{option.label}</Select.Label>
-              {option.options.map((item, index) => (
-                <Select.Item key={index} value={item.label}>{item.label}</Select.Item>
+              {option.options.map(item => (
+                <Select.Item key={item.value} value={item.label}>{item.label}</Select.Item>
               ))}
             </Select.Group>
           ))}
